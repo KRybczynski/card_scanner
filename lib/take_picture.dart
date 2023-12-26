@@ -1,10 +1,9 @@
 // A screen that allows users to take a picture using a given camera.
 import 'dart:io';
-import 'dart:math';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 class TakePictureScreen extends StatefulWidget {
@@ -17,6 +16,52 @@ class TakePictureScreen extends StatefulWidget {
 
   @override
   TakePictureScreenState createState() => TakePictureScreenState();
+}
+
+class PredictionResults {
+  String cardName;
+  int cardNumber, setTotal;
+  PredictionResults(this.cardName, this.cardNumber, this.setTotal);
+  @override
+  bool operator ==(other) =>
+      other is PredictionResults &&
+      cardName == other.cardName &&
+      cardNumber == other.cardNumber &&
+      setTotal == other.setTotal;
+  @override
+  int get hashCode =>
+      cardName.hashCode ^ cardNumber.hashCode ^ setTotal.hashCode;
+}
+
+class PictureAnalysisException implements Exception {
+  String cause;
+  PictureAnalysisException(this.cause);
+}
+
+Future<PredictionResults> analizePicture(File file) async {
+  final inputImage = InputImage.fromFile(file);
+  final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  RegExp pattern = RegExp(r"\d+\/\d+");
+
+  final RecognizedText recognizedText =
+      await textRecognizer.processImage(inputImage);
+  String text = recognizedText.text;
+  final textArray = text.split('\n');
+  if (textArray.length == 1) {
+    throw PictureAnalysisException("No text found");
+  }
+  String cardName = textArray[1];
+
+  for (final text in textArray) {
+    RegExpMatch? match = pattern.firstMatch(text);
+    if (match != null) {
+      final cardNumber = text.substring(match.start, match.end).split('/');
+      return PredictionResults(
+          cardName, int.parse(cardNumber[0]), int.parse(cardNumber[1]));
+    }
+  }
+  textRecognizer.close();
+  throw PictureAnalysisException("Card number not found");
 }
 
 class TakePictureScreenState extends State<TakePictureScreen> {
@@ -46,35 +91,10 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     super.dispose();
   }
 
-
-  Future<void> analizePicture(XFile file) async{
-    final inputImage = InputImage.fromFile(File(file.path));
-    final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-    final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
-
-    String text = recognizedText.text;
-    print('🟢' + text);
-    // for (TextBlock block in recognizedText.blocks) {
-    //   final Rect rect = block.boundingBox;
-    //   final List<Point<int>> cornerPoints = block.cornerPoints;
-    //   final String text = block.text;
-    //   final List<String> languages = block.recognizedLanguages;
-      
-    //   for (TextLine line in block.lines) {
-    //     // Same getters as TextBlock
-    //     for (TextElement element in line.elements) {
-    //       // Same getters as TextBlock
-    //     }
-    //   }
-    // }
-    textRecognizer.close();
-    return;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Take a picture')),
+      appBar: AppBar(title: const Text('Scan a card')),
       // You must wait until the controller is initialized before displaying the
       // camera preview. Use a FutureBuilder to display a loading spinner until the
       // controller has finished initializing.
@@ -104,19 +124,20 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             final image = await _controller.takePicture();
 
             if (!mounted) return;
-            analizePicture(image);
-
+            final resutl = await analizePicture(File(image.path));
+            Fluttertoast.showToast(msg: "${resutl.cardName} ${resutl.cardNumber} ${resutl.setTotal}");
             // If the picture was taken, display it on a new screen.
             await Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => DisplayPictureScreen(
                   // Pass the automatically generated path to
                   // the DisplayPictureScreen widget.
-                  imagePath: image.path,
-                  // imagePath: Image.asset('assets/images/test_pokemon_card.jpg').path,
+                  imagePath: image.path,            
                 ),
               ),
             );
+          } on PictureAnalysisException {
+            Fluttertoast.showToast(msg: "🔴 Error when analyzing picture");
           } catch (e) {
             // If an error occurs, log the error to the console.
             print(e);
@@ -127,6 +148,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     );
   }
 }
+
 // A widget that displays the picture taken by the user.
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
