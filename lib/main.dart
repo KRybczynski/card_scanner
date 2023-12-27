@@ -1,35 +1,52 @@
+import 'dart:async';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'take_picture.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<CameraDescription> prepareCamera() async{
+  List<CameraDescription> cameras = await availableCameras();
+  return cameras.first;
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Card Scanner',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: MyHomePage(),
-    );
-  }
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final firstCamera = await prepareCamera();
+  runApp(
+    MaterialApp(
+      title: 'Card scanner',
+      theme: ThemeData.dark(),
+      home: MyHomePage(camera: firstCamera),
+      // home: TakePictureScreen(
+      //   // Pass the appropriate camera to the TakePictureScreen widget.
+      //   camera: firstCamera,
+      // ),
+    ),
+  );
 }
 
-class MyHomePage extends StatelessWidget{
+
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key, required this.camera});
+  final CameraDescription camera;
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: Text(
-          "siema"
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: ()  {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => TakePictureScreen(camera: camera)));
+                return;
+              },
+              child: Text('Scan a Card'),
+            ),
+          ],
         ),
-      )
+      ),
     );
   }
 }
+
