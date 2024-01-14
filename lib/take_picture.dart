@@ -141,10 +141,11 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
             final dbHelper = DatabaseHelper();
 
-            await dbHelper.addCard(resutl.cardName,
-                resutl.cardNumber.toString(), resutl.setTotal.toString());
-            List<Map<String, dynamic>> savedCards =
-                await dbHelper.get_my_cards();
+            await dbHelper.addCard(
+                name: resutl.cardName,
+                number: resutl.cardNumber.toString(),
+                printedTotal: resutl.setTotal.toString());
+            List<Map<String, dynamic>> savedCards = await dbHelper.getMyCards();
             print(savedCards);
 
             int i = 0;

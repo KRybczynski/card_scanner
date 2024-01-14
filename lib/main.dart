@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'take_picture.dart';
 // import 'package:sqflite/sqflite.dart';
 import 'utils/database.dart';
+import 'showGallery.dart';
 
 Future<CameraDescription> prepareCamera() async {
   List<CameraDescription> cameras = await availableCameras();
@@ -16,8 +17,11 @@ void main() async {
 
   final dbHelper = DatabaseHelper();
   await dbHelper.initDatabase();
-  await dbHelper.initDatabaseMy();
+  print(await dbHelper.getDatabase());
 
+  // await dbHelper.initDatabaseMy();
+  print(
+      '------1------------------------------------------------------------------------------------');
   for (int j = 1; j < 2; j++) {
     try {
       // List<Map<String, dynamic>> cards = await fetchData(j);
@@ -26,10 +30,10 @@ void main() async {
       // await dbHelper.addCard('Reversal Energy', '266', '182');
 
       // Sprawdź, czy karty zostały zapisane
-      List<Map<String, dynamic>> savedCards = await dbHelper.get_my_cards();
-      print(savedCards);
+      List<Map<String, dynamic>> savedCards = await dbHelper.getMyCards();
+      // print(savedCards);
 
-      print('Page $j: ${savedCards.length} cards saved.');
+      // print('Page $j: ${savedCards.length} cards saved.');
 
       int i = 0;
       for (final card in savedCards) {
@@ -58,6 +62,13 @@ void main() async {
   );
 }
 
+Future<void> getDatabase() async {
+  print(
+      '---------------------------------yyyy-----------------------------------------------------');
+  // final dbHelper = DatabaseHelper();
+  // await dbHelper.getDatabase();
+}
+
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key, required this.camera});
   final CameraDescription camera;
@@ -79,6 +90,14 @@ class MyHomePage extends StatelessWidget {
                 return;
               },
               child: Text('Scan a Card'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ShowGallery()));
+                return;
+              },
+              child: Text('Gallery'),
             ),
           ],
         ),

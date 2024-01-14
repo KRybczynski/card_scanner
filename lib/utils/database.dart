@@ -4,36 +4,87 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DatabaseHelper {
-  late Database _database;
+  Database? _database;
 
   Future<void> deleteAllCards() async {
-    await _database.delete('cards');
+    if (_database == null) {
+      _database = await initDatabase();
+    }
+    await _database?.delete('cards');
   }
 
   Future<Database> getDatabase() async {
-    if (_database.isOpen) {
-      return _database;
-    } else {
-      _database = await openDatabase(
-        join(await getDatabasesPath(), 'your_database.db'),
-        onCreate: (db, version) async {
-          // Tworzenie tabeli...
-        },
-        version: 1,
-      );
-      return _database;
+    if (_database == null) {
+      _database = await initDatabase();
     }
+    return _database!;
   }
 
-  Future<void> addCard(String name, String number, String printedTotal) async {
-    await _database.transaction((txn) async {
-      // Pobierz kartę z tabeli cards na podstawie warunków
+  Future<Database> initDatabase() async {
+    print('-----------------------enter--------------------------------');
+
+    return openDatabase(
+      join(await getDatabasesPath(), 'your_database.db'),
+      onCreate: (db, version) async {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS cards (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            supertype TEXT,
+            hp TEXT,
+            types TEXT,
+            number TEXT,
+            set_printedTotal TEXT,
+            images_large TEXT
+          )
+        ''');
+        // Add the creation of my_cards table if it doesn't exist
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS my_cards (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            supertype TEXT,
+            hp TEXT,
+            types TEXT,
+            number TEXT,
+            set_printedTotal TEXT,
+            images_large TEXT
+          )
+        ''');
+      },
+      version: 1,
+    );
+  }
+
+  // Future<void> initDatabaseMy() async {
+  //   await _database?.execute('''
+  //         CREATE TABLE IF NOT EXISTS my_cards (
+  //           id TEXT PRIMARY KEY,
+  //           name TEXT,
+  //           supertype TEXT,
+  //           hp TEXT,
+  //           types TEXT,
+  //           number TEXT,
+  //           set_printedTotal TEXT,
+  //           images_large TEXT
+  //         )
+  //       ''');
+  // }
+
+  Future<void> addCard({
+    required String name,
+    required String number,
+    required String printedTotal,
+  }) async {
+    if (_database == null) {
+      _database = await initDatabase();
+    }
+    await _database?.transaction((txn) async {
       List<Map<String, dynamic>> result = await txn.rawQuery(
           'SELECT * FROM cards WHERE name = ? AND number = ? AND set_printedTotal = ?',
           [name, number, printedTotal]);
 
       if (result.isNotEmpty) {
-        // Skopiuj dane karty do tabeli my_cards
         await txn.rawInsert(
           'INSERT OR REPLACE INTO my_cards(id, name, supertype, hp, types, number, set_printedTotal, images_large) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
           [
@@ -51,53 +102,11 @@ class DatabaseHelper {
     });
   }
 
-  Future<void> initDatabase() async {
-    _database = await openDatabase(
-      join(await getDatabasesPath(), 'your_database.db'),
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS cards (
-            id TEXT PRIMARY KEY,
-            name TEXT,
-            supertype TEXT,
-            hp TEXT,
-            types TEXT,
-            number TEXT,
-            set_printedTotal TEXT,
-            images_large TEXT
-            -- averageSellPrice TEXT,
-            -- cardmarket_url TEXT
-            -- Dodaj pozostałe pola zgodnie z potrzebami
-          )
-        ''');
-      },
-      version: 1,
-    );
-  }
-
-  Future<void> initDatabaseMy() async {
-    // _database = await openDatabase(
-    //   join(await getDatabasesPath(), 'your_database.db'),
-    //   onCreate: (db, version) async {
-    await _database.execute('''
-          CREATE TABLE IF NOT EXISTS my_cards (
-            id TEXT PRIMARY KEY,
-            name TEXT,
-            supertype TEXT,
-            hp TEXT,
-            types TEXT,
-            number TEXT,
-            set_printedTotal TEXT,
-            images_large TEXT
-            -- Dodaj pozostałe pola zgodnie z potrzebami
-          )
-        ''');
-  }
-  //   version: 2,
-  // );
-
   Future<void> insertCards(List<Map<String, dynamic>> cards) async {
-    await _database.transaction((txn) async {
+    if (_database == null) {
+      _database = await initDatabase();
+    }
+    await _database?.transaction((txn) async {
       for (final card in cards) {
         await txn.rawInsert(
           'INSERT OR REPLACE INTO cards(id, name, supertype, hp, types, number, set_printedTotal, images_large) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
@@ -110,8 +119,6 @@ class DatabaseHelper {
             card['number'],
             card['set']['printedTotal'],
             card['images']['large'],
-            // card['cardmarket']['prices']['averageSellPrice'] ?? 0.0,
-            // card['cardmarket']['url'] ?? '',
           ],
         );
       }
@@ -119,12 +126,18 @@ class DatabaseHelper {
   }
 
   Future<List<Map<String, dynamic>>> getCards() async {
-    return await _database.rawQuery(
+    if (_database == null) {
+      _database = await initDatabase();
+    }
+    return await _database!.rawQuery(
         'SELECT id, name, supertype, hp, types, number, set_printedTotal, images_large FROM cards');
   }
 
-  Future<List<Map<String, dynamic>>> get_my_cards() async {
-    return await _database.rawQuery('SELECT * FROM my_cards');
+  Future<List<Map<String, dynamic>>> getMyCards() async {
+    if (_database == null) {
+      _database = await initDatabase();
+    }
+    return await _database!.rawQuery('SELECT * FROM my_cards');
   }
 }
 
