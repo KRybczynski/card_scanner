@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'utils/database.dart';
 
 class TakePictureScreen extends StatefulWidget {
   const TakePictureScreen({
@@ -125,14 +126,50 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
             if (!mounted) return;
             final resutl = await analizePicture(File(image.path));
-            Fluttertoast.showToast(msg: "${resutl.cardName} ${resutl.cardNumber} ${resutl.setTotal}");
+            Fluttertoast.showToast(
+                msg:
+                    "${resutl.cardName} ${resutl.cardNumber} ${resutl.setTotal}");
+
+            print(
+                '------------------------------------------------------------------------------------------');
+            print(
+                '------------------------------------------------------------------------------------------');
+            print(
+                '------------------------------------------------------------------------------------------');
+            print(
+                '------------------------------------------------------------------------------------------');
+
+            final dbHelper = DatabaseHelper();
+
+            await dbHelper.addCard(resutl.cardName,
+                resutl.cardNumber.toString(), resutl.setTotal.toString());
+            List<Map<String, dynamic>> savedCards =
+                await dbHelper.get_my_cards();
+            print(savedCards);
+
+            int i = 0;
+
+            for (final card in savedCards) {
+              i++;
+              print(i.toString() +
+                  ' ID: ${card['id']}, Name: ${card['name']}, Supertype: ${card['supertype']}, HP: ${card['hp']}, Types: ${card['types']}, Number: ${card['number']}, Printed Total: ${card['set_printedTotal']}, Images Large: ${card['images_large']}');
+            }
+            print(
+                '------------------------------------------------------------------------------------------');
+            print(
+                '------------------------------------------------------------------------------------------');
+            print(
+                '------------------------------------------------------------------------------------------');
+            print(
+                '------------------------------------------------------------------------------------------');
+
             // If the picture was taken, display it on a new screen.
             await Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => DisplayPictureScreen(
                   // Pass the automatically generated path to
                   // the DisplayPictureScreen widget.
-                  imagePath: image.path,            
+                  imagePath: image.path,
                 ),
               ),
             );

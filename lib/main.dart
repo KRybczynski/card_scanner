@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'take_picture.dart';
+// import 'package:sqflite/sqflite.dart';
+import 'utils/database.dart';
 
-Future<CameraDescription> prepareCamera() async{
+Future<CameraDescription> prepareCamera() async {
   List<CameraDescription> cameras = await availableCameras();
   return cameras.first;
 }
@@ -11,6 +13,38 @@ Future<CameraDescription> prepareCamera() async{
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final firstCamera = await prepareCamera();
+
+  final dbHelper = DatabaseHelper();
+  await dbHelper.initDatabase();
+  await dbHelper.initDatabaseMy();
+
+  for (int j = 1; j < 2; j++) {
+    try {
+      // List<Map<String, dynamic>> cards = await fetchData(j);
+      // await dbHelper.insertCards(cards);
+
+      // await dbHelper.addCard('Reversal Energy', '266', '182');
+
+      // Sprawdź, czy karty zostały zapisane
+      List<Map<String, dynamic>> savedCards = await dbHelper.get_my_cards();
+      print(savedCards);
+
+      print('Page $j: ${savedCards.length} cards saved.');
+
+      int i = 0;
+      for (final card in savedCards) {
+        i++;
+        print(i.toString() +
+            ' ID: ${card['id']}, Name: ${card['name']}, Supertype: ${card['supertype']}, HP: ${card['hp']}, Types: ${card['types']}, Number: ${card['number']}, Printed Total: ${card['set_printedTotal']}, Images Large: ${card['images_large']}');
+      }
+
+      //
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  //
   runApp(
     MaterialApp(
       title: 'Card scanner',
@@ -24,7 +58,6 @@ void main() async {
   );
 }
 
-
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key, required this.camera});
   final CameraDescription camera;
@@ -37,8 +70,12 @@ class MyHomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: ()  {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => TakePictureScreen(camera: camera)));
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            TakePictureScreen(camera: camera)));
                 return;
               },
               child: Text('Scan a Card'),
@@ -49,4 +86,3 @@ class MyHomePage extends StatelessWidget {
     );
   }
 }
-
