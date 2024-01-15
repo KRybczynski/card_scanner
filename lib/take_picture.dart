@@ -53,12 +53,6 @@ Future<PredictionResults> analizePicture(File file) async {
     throw PictureAnalysisException("No text found");
   }
   String cardName = textArray[1];
-  print('\nx\na\ns\nw\na\n');
-  print('\ns\nz\nq\nw\nq\qn');
-
-  print(textArray);
-  print('\nx\na\ns\nw\na\n');
-  print('\ns\nz\nq\nw\nq\qn');
 
   for (final text in textArray) {
     RegExpMatch? match = pattern.firstMatch(text);

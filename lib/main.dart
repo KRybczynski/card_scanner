@@ -31,9 +31,6 @@ void main() async {
       List<Map<String, dynamic>> savedCards = await dbHelper.getMyCards();
       List<Map<String, dynamic>> savedCards2 = await dbHelper.getCards();
 
-      print(savedCards2);
-      print(savedCards2);
-
       // print('Page $j: ${savedCards.length} cards saved.');
 
       int i = 0;
