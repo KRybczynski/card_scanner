@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'take_picture.dart';
-// import 'package:sqflite/sqflite.dart';
 import 'utils/database.dart';
 import 'showGallery.dart';
 
@@ -20,18 +19,20 @@ void main() async {
   print(await dbHelper.getDatabase());
 
   // await dbHelper.initDatabaseMy();
-  print(
-      '------1------------------------------------------------------------------------------------');
+
   for (int j = 1; j < 2; j++) {
     try {
-      // List<Map<String, dynamic>> cards = await fetchData(j);
-      // await dbHelper.insertCards(cards);
+      List<Map<String, dynamic>> cards = await fetchData(j);
+      await dbHelper.insertCards(cards);
 
       // await dbHelper.addCard('Reversal Energy', '266', '182');
 
       // Sprawdź, czy karty zostały zapisane
       List<Map<String, dynamic>> savedCards = await dbHelper.getMyCards();
-      // print(savedCards);
+      List<Map<String, dynamic>> savedCards2 = await dbHelper.getCards();
+
+      print(savedCards2);
+      print(savedCards2);
 
       // print('Page $j: ${savedCards.length} cards saved.');
 
@@ -41,14 +42,11 @@ void main() async {
         print(i.toString() +
             ' ID: ${card['id']}, Name: ${card['name']}, Supertype: ${card['supertype']}, HP: ${card['hp']}, Types: ${card['types']}, Number: ${card['number']}, Printed Total: ${card['set_printedTotal']}, Images Large: ${card['images_large']}');
       }
-
-      //
     } catch (e) {
       print('Error: $e');
     }
   }
 
-  //
   runApp(
     MaterialApp(
       title: 'Card scanner',
@@ -62,19 +60,13 @@ void main() async {
   );
 }
 
-Future<void> getDatabase() async {
-  print(
-      '---------------------------------yyyy-----------------------------------------------------');
-  // final dbHelper = DatabaseHelper();
-  // await dbHelper.getDatabase();
-}
-
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key, required this.camera});
   final CameraDescription camera;
 
   @override
   Widget build(BuildContext context) {
+    double buttonWidth = MediaQuery.of(context).size.width * 0.5;
     return Scaffold(
       body: Center(
         child: Column(
@@ -89,6 +81,11 @@ class MyHomePage extends StatelessWidget {
                             TakePictureScreen(camera: camera)));
                 return;
               },
+              style: ButtonStyle(
+                fixedSize: MaterialStateProperty.all(
+                  Size(buttonWidth, 45.0),
+                ),
+              ),
               child: Text('Scan a Card'),
             ),
             ElevatedButton(
@@ -97,6 +94,11 @@ class MyHomePage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => ShowGallery()));
                 return;
               },
+              style: ButtonStyle(
+                fixedSize: MaterialStateProperty.all(
+                  Size(buttonWidth, 45.0),
+                ),
+              ),
               child: Text('Gallery'),
             ),
           ],

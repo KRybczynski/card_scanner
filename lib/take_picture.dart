@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:card_scanner/main.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -52,6 +53,12 @@ Future<PredictionResults> analizePicture(File file) async {
     throw PictureAnalysisException("No text found");
   }
   String cardName = textArray[1];
+  print('\nx\na\ns\nw\na\n');
+  print('\ns\nz\nq\nw\nq\qn');
+
+  print(textArray);
+  print('\nx\na\ns\nw\na\n');
+  print('\ns\nz\nq\nw\nq\qn');
 
   for (final text in textArray) {
     RegExpMatch? match = pattern.firstMatch(text);
@@ -129,17 +136,16 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             Fluttertoast.showToast(
                 msg:
                     "${resutl.cardName} ${resutl.cardNumber} ${resutl.setTotal}");
-
-            print(
-                '------------------------------------------------------------------------------------------');
-            print(
-                '------------------------------------------------------------------------------------------');
-            print(
-                '------------------------------------------------------------------------------------------');
-            print(
-                '------------------------------------------------------------------------------------------');
-
             final dbHelper = DatabaseHelper();
+
+            await dbHelper.initDatabase();
+            await dbHelper.getDatabase();
+            print(await dbHelper.getDatabase());
+
+            // print('\n\n\n\n\n\n');
+            // await dbHelper.addCard(
+            //     name: 'Aggron', number: '1', printedTotal: '102');
+            // print('\n\n\n\n\n\n');
 
             await dbHelper.addCard(
                 name: resutl.cardName,
@@ -155,15 +161,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               print(i.toString() +
                   ' ID: ${card['id']}, Name: ${card['name']}, Supertype: ${card['supertype']}, HP: ${card['hp']}, Types: ${card['types']}, Number: ${card['number']}, Printed Total: ${card['set_printedTotal']}, Images Large: ${card['images_large']}');
             }
-            print(
-                '------------------------------------------------------------------------------------------');
-            print(
-                '------------------------------------------------------------------------------------------');
-            print(
-                '------------------------------------------------------------------------------------------');
-            print(
-                '------------------------------------------------------------------------------------------');
-
             // If the picture was taken, display it on a new screen.
             await Navigator.of(context).push(
               MaterialPageRoute(

@@ -139,6 +139,18 @@ class DatabaseHelper {
     }
     return await _database!.rawQuery('SELECT * FROM my_cards');
   }
+
+  Future<void> deleteMyCard(String cardId) async {
+    if (_database == null) {
+      _database = await initDatabase();
+    }
+
+    await _database?.delete(
+      'my_cards',
+      where: 'id = ?',
+      whereArgs: [cardId],
+    );
+  }
 }
 
 Future<List<Map<String, dynamic>>> fetchData(int page) async {

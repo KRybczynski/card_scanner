@@ -14,11 +14,19 @@ class _ShowGalleryState extends State<ShowGallery> {
   void initState() {
     super.initState();
     initDatabase();
-    galleryCards = dbHelper.getMyCards();
+    // Pobieranie kart po każdej zmianie stanu
+    refreshGallery();
   }
 
   Future<void> initDatabase() async {
     await dbHelper.initDatabase();
+  }
+
+  // Nowa metoda do odświeżania zawartości galerii
+  Future<void> refreshGallery() async {
+    setState(() {
+      galleryCards = dbHelper.getMyCards();
+    });
   }
 
   @override
@@ -41,11 +49,10 @@ class _ShowGalleryState extends State<ShowGallery> {
           } else {
             return GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Liczba kolumn w rzędzie
-                crossAxisSpacing: 8, // Odstęp między kolumnami
-                mainAxisSpacing: 8, // Odstęp między rzędami
-                childAspectRatio:
-                    0.7, // Dostosuj proporcję szerokości do wysokości
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 0.7,
               ),
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
@@ -57,7 +64,10 @@ class _ShowGalleryState extends State<ShowGallery> {
                       MaterialPageRoute(
                         builder: (context) => CardDetailsScreen(card),
                       ),
-                    );
+                    ).then((value) {
+                      // Po powrocie z ekranu szczegółów, odśwież galerię
+                      refreshGallery();
+                    });
                   },
                   child: Card(
                     elevation: 4,
@@ -66,13 +76,12 @@ class _ShowGalleryState extends State<ShowGallery> {
                         Image.network(
                           '${card['images_large']}',
                           width: double.infinity,
-                          height: 200, // Dostosuj wysokość zdjęcia
+                          height: 170,
                           fit: BoxFit.cover,
                         ),
                         ListTile(
                           title: Text('${card['name']}'),
                           subtitle: Text('ID: ${card['id']}'),
-                          // Dodaj więcej szczegółów lub dostosuj ListTile według potrzeb
                         ),
                       ],
                     ),
@@ -97,6 +106,15 @@ class CardDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('${card['name']} Details'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              // Dodaj logikę usuwania karty
+              deleteCard(context, card);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -133,13 +151,48 @@ class CardDetailsScreen extends StatelessWidget {
               subtitle: Text('${card['number']}'),
             ),
             ListTile(
-              title: Text('Set Printed Total'),
+              title: Text('Printed Total'),
               subtitle: Text('${card['set_printedTotal']}'),
             ),
             // Dodaj pozostałe informacje o karcie
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> deleteCard(
+      BuildContext context, Map<String, dynamic> card) async {
+    final dbHelper = DatabaseHelper();
+    await dbHelper.getDatabase();
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Card'),
+          content: Text(
+              'Are you sure you want to delete this card from your collection?'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                // Usuń kartę
+                await dbHelper.getDatabase();
+                await dbHelper.deleteMyCard(card['id']);
+                Navigator.of(context).pop(); // Zamknij aktualny ekran
+                Navigator.of(context).pop(); // Wróć do ekranu galerii
+              },
+              child: Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('No'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
