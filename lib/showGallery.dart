@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'utils/database.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ShowGallery extends StatefulWidget {
   @override
@@ -153,6 +154,30 @@ class CardDetailsScreen extends StatelessWidget {
             ListTile(
               title: Text('Printed Total'),
               subtitle: Text('${card['set_printedTotal']}'),
+            ),
+            ListTile(
+              title: Text('Average Sell Price'),
+              subtitle: Text('${card['cardmarket_prices_averageSellPrice']}'),
+            ),
+            ListTile(
+              title: Text('Cardmarket URL'),
+              subtitle: GestureDetector(
+                onTap: () async {
+                  final String url = card['cardmarket_url'];
+                  if (await canLaunch(url)) {
+                    await launch(url);
+                  } else {
+                    throw 'Could not launch $url';
+                  }
+                },
+                child: Text(
+                  '${card['cardmarket_url']}',
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                    color: Colors.blue, // Kolor linku
+                  ),
+                ),
+              ),
             ),
             // Dodaj pozostałe informacje o karcie
           ],
