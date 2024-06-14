@@ -3,6 +3,8 @@ import 'utils/database.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ShowGallery extends StatefulWidget {
+  const ShowGallery({super.key});
+
   @override
   _ShowGalleryState createState() => _ShowGalleryState();
 }
@@ -34,22 +36,22 @@ class _ShowGalleryState extends State<ShowGallery> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Card Gallery'),
+        title: const Text('Card Gallery'),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: galleryCards,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
+            return const Center(
               child: Text('No cards in the gallery'),
             );
           } else {
             return GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
@@ -100,7 +102,7 @@ class _ShowGalleryState extends State<ShowGallery> {
 class CardDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> card;
 
-  CardDetailsScreen(this.card);
+  const CardDetailsScreen(this.card, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +111,7 @@ class CardDetailsScreen extends StatelessWidget {
         title: Text('${card['name']} Details'),
         actions: [
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: const Icon(Icons.delete),
             onPressed: () {
               // Dodaj logikę usuwania karty
               deleteCard(context, card);
@@ -118,49 +120,49 @@ class CardDetailsScreen extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Wyświetl całe zdjęcie karty, zajmując 80% szerokości ekranu
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
               child: Image.network(
                 '${card['images_large']}',
                 fit: BoxFit.cover,
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ListTile(
               title: Text('${card['name']}'),
               subtitle: Text('ID: ${card['id']}'),
             ),
             ListTile(
-              title: Text('Supertype'),
+              title: const Text('Supertype'),
               subtitle: Text('${card['supertype']}'),
             ),
             ListTile(
-              title: Text('HP'),
+              title: const Text('HP'),
               subtitle: Text('${card['hp']}'),
             ),
             ListTile(
-              title: Text('Types'),
+              title: const Text('Types'),
               subtitle: Text('${card['types']}'),
             ),
             ListTile(
-              title: Text('Number'),
+              title: const Text('Number'),
               subtitle: Text('${card['number']}'),
             ),
             ListTile(
-              title: Text('Printed Total'),
+              title: const Text('Printed Total'),
               subtitle: Text('${card['set_printedTotal']}'),
             ),
             ListTile(
-              title: Text('Average Sell Price'),
+              title: const Text('Average Sell Price'),
               subtitle: Text('${card['cardmarket_prices_averageSellPrice']}'),
             ),
             ListTile(
-              title: Text('Cardmarket URL'),
+              title: const Text('Cardmarket URL'),
               subtitle: GestureDetector(
                 onTap: () async {
                   final String url = card['cardmarket_url'];
@@ -172,7 +174,7 @@ class CardDetailsScreen extends StatelessWidget {
                 },
                 child: Text(
                   '${card['cardmarket_url']}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     decoration: TextDecoration.underline,
                     color: Colors.blue, // Kolor linku
                   ),
@@ -195,8 +197,8 @@ class CardDetailsScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Card'),
-          content: Text(
+          title: const Text('Delete Card'),
+          content: const Text(
               'Are you sure you want to delete this card from your collection?'),
           actions: [
             TextButton(
@@ -207,13 +209,13 @@ class CardDetailsScreen extends StatelessWidget {
                 Navigator.of(context).pop(); // Zamknij aktualny ekran
                 Navigator.of(context).pop(); // Wróć do ekranu galerii
               },
-              child: Text('Yes'),
+              child: const Text('Yes'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('No'),
+              child: const Text('No'),
             ),
           ],
         );

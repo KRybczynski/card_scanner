@@ -3,6 +3,8 @@ import 'utils/database.dart';
 import 'showGallery.dart';
 
 class DeckManager extends StatefulWidget {
+  const DeckManager({super.key});
+
   @override
   _DeckManagerState createState() => _DeckManagerState();
 }
@@ -27,17 +29,17 @@ class _DeckManagerState extends State<DeckManager> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Deck Manager'),
+        title: const Text('Deck Manager'),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: decks,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
+            return const Center(
               child: Text('No decks available'),
             );
           } else {
@@ -58,12 +60,12 @@ class _DeckManagerState extends State<DeckManager> {
                   },
                   background: Container(
                     color: Colors.red,
-                    child: Icon(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: const Icon(
                       Icons.delete,
                       color: Colors.white,
                     ),
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20.0),
                   ),
                   child: InkWell(
                     onTap: () {
@@ -101,7 +103,7 @@ class _DeckManagerState extends State<DeckManager> {
             },
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -110,7 +112,7 @@ class _DeckManagerState extends State<DeckManager> {
 class DeckDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> deck;
 
-  DeckDetailsScreen(this.deck);
+  const DeckDetailsScreen(this.deck, {super.key});
 
   @override
   _DeckDetailsScreenState createState() => _DeckDetailsScreenState();
@@ -142,16 +144,16 @@ class _DeckDetailsScreenState extends State<DeckDetailsScreen> {
         future: deckCards,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
+            return const Center(
               child: Text('No cards in the deck'),
             );
           } else {
             return GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
@@ -210,7 +212,7 @@ class _DeckDetailsScreenState extends State<DeckDetailsScreen> {
             },
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -221,8 +223,7 @@ class AddCardToDeckDialog extends StatefulWidget {
   final VoidCallback onCardAdded;
 
   const AddCardToDeckDialog(
-      {Key? key, required this.deckId, required this.onCardAdded})
-      : super(key: key);
+      {super.key, required this.deckId, required this.onCardAdded});
 
   @override
   _AddCardToDeckDialogState createState() => _AddCardToDeckDialogState();
@@ -247,20 +248,20 @@ class _AddCardToDeckDialogState extends State<AddCardToDeckDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add Card to Deck'),
+      title: const Text('Add Card to Deck'),
       content: FutureBuilder<List<Map<String, dynamic>>>(
         future: availableCards,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
+            return const Center(
               child: Text('No available cards'),
             );
           } else {
-            return Container(
+            return SizedBox(
               width: double.maxFinite,
               child: ListView.builder(
                 itemCount: snapshot.data!.length,
@@ -289,7 +290,7 @@ class _AddCardToDeckDialogState extends State<AddCardToDeckDialog> {
 class AddDeckDialog extends StatefulWidget {
   final VoidCallback onDeckAdded;
 
-  const AddDeckDialog({Key? key, required this.onDeckAdded}) : super(key: key);
+  const AddDeckDialog({super.key, required this.onDeckAdded});
 
   @override
   _AddDeckDialogState createState() => _AddDeckDialogState();
@@ -302,17 +303,17 @@ class _AddDeckDialogState extends State<AddDeckDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add New Deck'),
+      title: const Text('Add New Deck'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: nameController,
-            decoration: InputDecoration(labelText: 'Deck Name'),
+            decoration: const InputDecoration(labelText: 'Deck Name'),
           ),
           TextField(
             controller: descriptionController,
-            decoration: InputDecoration(labelText: 'Description'),
+            decoration: const InputDecoration(labelText: 'Description'),
           ),
         ],
       ),
@@ -321,7 +322,7 @@ class _AddDeckDialogState extends State<AddDeckDialog> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         TextButton(
           onPressed: () async {
@@ -335,7 +336,7 @@ class _AddDeckDialogState extends State<AddDeckDialog> {
             Navigator.of(context).pop();
             widget.onDeckAdded();
           },
-          child: Text('Add Deck'),
+          child: const Text('Add Deck'),
         ),
       ],
     );

@@ -8,23 +8,17 @@ class DatabaseHelper {
   Database? _database;
 
   Future<void> deleteAllCards() async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     await _database?.delete('cards');
   }
 
   Future<Database> getDatabase() async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     return _database!;
   }
 
   Future<List<Map<String, dynamic>>> getDecks() async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     return await _database!.rawQuery('SELECT * FROM decks');
   }
 
@@ -99,9 +93,7 @@ class DatabaseHelper {
     required String printedTotal,
     String? deckId,
   }) async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     await _database?.transaction((txn) async {
       List<Map<String, dynamic>> result = await txn.rawQuery(
         'SELECT * FROM cards WHERE name = ? AND number = ? AND set_printedTotal = ?',
@@ -134,9 +126,7 @@ class DatabaseHelper {
     required String name,
     required String description,
   }) async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     await _database?.insert(
       'decks',
       {'id': id, 'name': name, 'description': description},
@@ -145,16 +135,12 @@ class DatabaseHelper {
   }
 
   Future<void> deleteDeck(String deckId) async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     await _database?.delete('decks', where: 'id = ?', whereArgs: [deckId]);
   }
 
   Future<void> insertCards(List<Map<String, dynamic>> cards) async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
 
     await _database?.transaction((txn) async {
       for (final card in cards) {
@@ -169,8 +155,8 @@ class DatabaseHelper {
 
         // Sprawdzenie warunkowe przed dostępem do atrybutów cardmarket
         final cardmarketPricesAverageSellPrice =
-            card['cardmarket']['prices']['averageSellPrice'] ?? null;
-        final cardmarketUrl = card['cardmarket']['url'] ?? null;
+            card['cardmarket']['prices']['averageSellPrice'];
+        final cardmarketUrl = card['cardmarket']['url'];
 
         await txn.rawInsert(
           'INSERT OR REPLACE INTO cards(id, name, supertype, hp, types, number, set_printedTotal, images_large, cardmarket_prices_averageSellPrice, cardmarket_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -192,48 +178,36 @@ class DatabaseHelper {
   }
 
   Future<List<Map<String, dynamic>>> getCards() async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     return await _database!.rawQuery('SELECT * FROM cards');
   }
 
   Future<List<Map<String, dynamic>>> getMyCards() async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     return await _database!.rawQuery('SELECT * FROM my_cards');
   }
 
   Future<List<Map<String, dynamic>>> getMyCardsForDeck(String deckId) async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     return await _database!
         .rawQuery('SELECT * FROM my_cards WHERE deck_id = ?', [deckId]);
   }
 
   Future<List<Map<String, dynamic>>> getMyCardsNotInDeck(String deckId) async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     return await _database!.rawQuery(
         'SELECT * FROM my_cards WHERE deck_id IS NULL OR deck_id != ?',
         [deckId]);
   }
 
   Future<void> addCardToDeck(String cardId, String deckId) async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
     await _database?.rawUpdate(
         'UPDATE my_cards SET deck_id = ? WHERE id = ?', [deckId, cardId]);
   }
 
   Future<void> deleteMyCard(String cardId) async {
-    if (_database == null) {
-      _database = await initDatabase();
-    }
+    _database ??= await initDatabase();
 
     await _database?.delete(
       'my_cards',
@@ -271,11 +245,11 @@ class DatabaseHelper {
             List<Map<String, dynamic>>.from(data['data'] ?? []);
 
         // Sprawdź czy karty mają atrybuty 'prices' i 'url', jeśli nie, ustaw wartości domyślne
-        cards.forEach((card) {
+        for (var card in cards) {
           card['cardmarket'] ??= {};
           card['cardmarket']['prices'] ??= {};
           card['cardmarket']['url'] ??= '';
-        });
+        }
 
         return cards;
       } else {

@@ -2,7 +2,6 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:card_scanner/main.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -128,8 +127,10 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             if (!mounted) return;
             final resutl = await analizePicture(File(image.path));
             Fluttertoast.showToast(
-                msg:
-                    "${resutl.cardName} ${resutl.cardNumber} ${resutl.setTotal}");
+                msg:"${resutl.cardName} ${resutl.cardNumber} ${resutl.setTotal}",
+                toastLength: Toast.LENGTH_SHORT,
+                timeInSecForIosWeb: 2,
+              );
             final dbHelper = DatabaseHelper();
 
             await dbHelper.initDatabase();
@@ -140,7 +141,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             // await dbHelper.addCard(
             //     name: 'Aggron', number: '1', printedTotal: '102');
             // print('\n\n\n\n\n\n');
-
             await dbHelper.addCard(
                 name: resutl.cardName,
                 number: resutl.cardNumber.toString(),
@@ -152,8 +152,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
             for (final card in savedCards) {
               i++;
-              print(i.toString() +
-                  ' ID: ${card['id']}, Name: ${card['name']}, Supertype: ${card['supertype']}, HP: ${card['hp']}, Types: ${card['types']}, Number: ${card['number']}, Printed Total: ${card['set_printedTotal']}, Images Large: ${card['images_large']}');
+              print('$i ID: ${card['id']}, Name: ${card['name']}, Supertype: ${card['supertype']}, HP: ${card['hp']}, Types: ${card['types']}, Number: ${card['number']}, Printed Total: ${card['set_printedTotal']}, Images Large: ${card['images_large']}');
             }
             // If the picture was taken, display it on a new screen.
             await Navigator.of(context).push(
@@ -166,7 +165,11 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               ),
             );
           } on PictureAnalysisException {
-            Fluttertoast.showToast(msg: "🔴 Error when analyzing picture");
+            Fluttertoast.showToast(
+              msg: "🔴 Error when analyzing picture",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 1, 
+            );
           } catch (e) {
             // If an error occurs, log the error to the console.
             print(e);
